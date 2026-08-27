@@ -3,7 +3,7 @@ import java.util.Scanner;
 public class Nico {
     private static final String DIVIDER =
             "____________________________________________________________";
-    private static final String[] tasks = new String[100];
+    private static final Task[] tasks = new Task[100];
     private static int taskCount = 0;
 
     public static void main(String[] args) {
@@ -33,21 +33,40 @@ public class Nico {
     private static void handleCommand(String command) {
         if (command.equals("list")) {
             printTaskList();
+        } else if (command.startsWith("mark ")) {
+            markTask(command, true);
+        } else if (command.startsWith("unmark ")) {
+            markTask(command, false);
         } else {
             addTask(command);
         }
     }
 
     private static void addTask(String description) {
-        tasks[taskCount] = description;
+        tasks[taskCount] = new Task(description);
         taskCount++;
         System.out.println("added: " + description);
     }
 
     private static void printTaskList() {
+        System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + ". " + tasks[i]);
+            System.out.println((i + 1) + "." + tasks[i]);
         }
+    }
+
+    private static void markTask(String command, boolean isDone) {
+        int prefixLength = isDone ? 5 : 7;   // "mark ".length() vs "unmark ".length()
+        int index = Integer.parseInt(command.substring(prefixLength)) - 1;
+
+        if (isDone) {
+            tasks[index].markAsDone();
+            System.out.println("Nice! I've marked this task as done:");
+        } else {
+            tasks[index].markAsNotDone();
+            System.out.println("OK, I've marked this task as not done yet:");
+        }
+        System.out.println("  " + tasks[index]);
     }
 
     private static void printGreeting(String banner) {
