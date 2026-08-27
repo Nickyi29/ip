@@ -39,8 +39,6 @@ public class Nico {
     private static void handleCommand(String command){
         if (command.equals("list")){
             printTaskList();
-        } else{
-            addTask(command);
         }
 
         else if(command.equals("blah")){
