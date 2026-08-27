@@ -1,8 +1,6 @@
-/**
- * Entry point for the Duke chatbot application.
- * For now, the bot only greets the user on startup and says goodbye on exit.
- */
-public class Duke {
+import java.util.Scanner;
+
+public class Nico {
     private static final String DIVIDER =
             "____________________________________________________________";
 
@@ -14,6 +12,7 @@ public class Duke {
                 + "|_| \\_|\\___/_____|___|\n";
 
         printGreeting(banner);
+        runCommandLoop();
         printFarewell();
     }
 
@@ -24,6 +23,41 @@ public class Duke {
         System.out.println("What can I do for you?");
         System.out.println(DIVIDER);
     }
+
+    private static void runCommandLoop() {
+        Scanner scanner = new Scanner(System.in);
+        String command = scanner.nextLine();
+
+        while(!command.equals("bye")) {
+            System.out.println(DIVIDER);
+            System.out.println(command);
+            System.out.println(DIVIDER);
+            command = scanner.nextLine();
+        }
+    }
+
+    private static void handleCommand(String command){
+        if (command.equals("list")){
+            printTaskList();
+        } else{
+            addTask(command);
+        }
+
+        else if(command.equals("blah")){
+            printBlah();
+        }
+
+    }
+
+
+    private static void printTaskList(){
+        System.out.println("list");
+    }
+
+    private static void printBlah(){
+        System.out.println("blah");
+    }
+
 
     private static void printFarewell() {
         System.out.println("Bye. Hope to see you again soon!");
