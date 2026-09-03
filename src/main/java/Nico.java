@@ -3,7 +3,13 @@ import java.util.Scanner;
 public class Nico {
     private static final String DIVIDER =
             "____________________________________________________________";
-    private static final Task[] tasks = new Task[100];
+
+    private static final int MAX_TASKS = 100;
+    private static final Task[] tasks = new Task[MAX_TASKS];
+    private static final String BYE_COMMAND = "bye";
+    private static final String LIST_COMMAND = "list";
+    private static final String MARK_COMMAND = "mark ";
+    private static final String UNMARK_COMMAND = "unmark ";
     private static int taskCount = 0;
 
     public static void main(String[] args) {
@@ -22,7 +28,7 @@ public class Nico {
         Scanner scanner = new Scanner(System.in);
         String command = scanner.nextLine();
 
-        while (!command.equals("bye")) {
+        while (!command.equals(BYE_COMMAND)){
             System.out.println(DIVIDER);
             handleCommand(command);
             System.out.println(DIVIDER);
@@ -31,11 +37,11 @@ public class Nico {
     }
 
     private static void handleCommand(String command) {
-        if (command.equals("list")) {
+        if (command.equals(LIST_COMMAND)) {
             printTaskList();
-        } else if (command.startsWith("mark ")) {
+        } else if (command.startsWith(MARK_COMMAND)) {
             markTask(command, true);
-        } else if (command.startsWith("unmark ")) {
+        } else if (command.startsWith(UNMARK_COMMAND)) {
             markTask(command, false);
         } else {
             addTask(command);
@@ -56,7 +62,7 @@ public class Nico {
     }
 
     private static void markTask(String command, boolean isDone) {
-        int prefixLength = isDone ? 5 : 7;   // "mark ".length() vs "unmark ".length()
+        int prefixLength = isDone ? MARK_COMMAND.length() : UNMARK_COMMAND.length();
         int index = Integer.parseInt(command.substring(prefixLength)) - 1;
 
         if (isDone) {
