@@ -63,7 +63,13 @@ public class Nico {
     }
 
     private static void handleTodo(String command) {
-        String description = command.substring(TODO_COMMAND_PREFIX.length());
+        String description = command.substring(TODO_COMMAND_PREFIX.length()).trim();
+
+        if (description.isEmpty()) {
+            System.out.println("OOPS!!! The description of a todo cannot be empty.");
+            return;
+        }
+
         addTask(new Todo(description));
     }
 
@@ -76,7 +82,19 @@ public class Nico {
             return;
         }
 
-        addTask(new Deadline(parts[0], parts[1]));
+        String description = parts[0].trim();
+        String by = parts[1].trim();
+
+        if (description.isEmpty()) {
+            System.out.println("OOPS!!! The description of a deadline cannot be empty.");
+            return;
+        }
+        if (by.isEmpty()) {
+            System.out.println("OOPS!!! The /by date of a deadline cannot be empty.");
+            return;
+        }
+
+        addTask(new Deadline(description, by));
     }
 
     private static void handleEvent(String command) {
@@ -95,10 +113,28 @@ public class Nico {
             return;
         }
 
-        addTask(new Event(fromParts[0], toParts[0], toParts[1]));
+        String description = fromParts[0].trim();
+        String from = toParts[0].trim();
+        String to = toParts[1].trim();
+
+        if (description.isEmpty()) {
+            System.out.println("OOPS!!! The description of an event cannot be empty.");
+            return;
+        }
+        if (from.isEmpty() || to.isEmpty()) {
+            System.out.println("OOPS!!! The /from and /to times of an event cannot be empty.");
+            return;
+        }
+
+        addTask(new Event(description, from, to));
     }
 
     private static void addTask(Task task) {
+        if (taskCount >= MAX_TASKS) {
+            System.out.println("OOPS!!! Your task list is full (max " + MAX_TASKS + " tasks).");
+            return;
+        }
+
         tasks[taskCount] = task;
         taskCount++;
         System.out.println("Got it. I've added this task:");
@@ -115,16 +151,25 @@ public class Nico {
 
     private static void markTask(String command, boolean isDone) {
         int prefixLength = isDone ? MARK_COMMAND_PREFIX.length() : UNMARK_COMMAND_PREFIX.length();
-        int index = Integer.parseInt(command.substring(prefixLength)) - 1;
+        String commandName = isDone ? "mark" : "unmark";
 
-        if (isDone) {
-            tasks[index].markAsDone();
-            System.out.println("Nice! I've marked this task as done:");
-        } else {
-            tasks[index].markAsNotDone();
-            System.out.println("OK, I've marked this task as not done yet:");
+        try {
+            int index = Integer.parseInt(command.substring(prefixLength).trim()) - 1;
+            Task task = tasks[index];
+
+            if (isDone) {
+                task.markAsDone();
+                System.out.println("Nice! I've marked this task as done:");
+            } else {
+                task.markAsNotDone();
+                System.out.println("OK, I've marked this task as not done yet:");
+            }
+            System.out.println("  " + task);
+        } catch (NumberFormatException e) {
+            System.out.println("OOPS!!! Please enter a valid task number, e.g. " + commandName + " 2");
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("OOPS!!! That task number doesn't exist. You have " + taskCount + " task(s).");
         }
-        System.out.println("  " + tasks[index]);
     }
 
     private static void printGreeting(String banner) {
