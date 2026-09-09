@@ -1,3 +1,10 @@
+package nico;
+
+import nico.tasks.Deadline;
+import nico.tasks.Event;
+import nico.tasks.Task;
+import nico.tasks.Todo;
+
 import java.util.Scanner;
 
 public class Nico {
