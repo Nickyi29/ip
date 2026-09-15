@@ -22,6 +22,7 @@ public class Nico {
     private static final String TODO_COMMAND_PREFIX = "todo ";
     private static final String DEADLINE_COMMAND_PREFIX = "deadline ";
     private static final String EVENT_COMMAND_PREFIX = "event ";
+    private static final String DELETE_COMMAND_PREFIX = "delete ";
 
     private static final String BY_DELIMITER = " /by ";
     private static final String FROM_DELIMITER = " /from ";
@@ -64,6 +65,8 @@ public class Nico {
             handleDeadline(command);
         } else if (command.startsWith(EVENT_COMMAND_PREFIX)) {
             handleEvent(command);
+        } else if (command.startsWith(DELETE_COMMAND_PREFIX)) {
+            deleteTask(command);
         } else {
             System.out.println("OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
@@ -162,6 +165,11 @@ public class Nico {
 
         try {
             int index = Integer.parseInt(command.substring(prefixLength).trim()) - 1;
+
+            if (index < 0 || index >= taskCount) {
+                throw new IndexOutOfBoundsException();
+            }
+
             Task task = tasks[index];
 
             if (isDone) {
@@ -174,6 +182,32 @@ public class Nico {
             System.out.println("  " + task);
         } catch (NumberFormatException e) {
             System.out.println("OOPS!!! Please enter a valid task number, e.g. " + commandName + " 2");
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("OOPS!!! That task number doesn't exist. You have " + taskCount + " task(s).");
+        }
+    }
+
+    private static void deleteTask(String command) {
+        try {
+            int index = Integer.parseInt(command.substring(DELETE_COMMAND_PREFIX.length()).trim()) - 1;
+
+            if (index < 0 || index >= taskCount) {
+                throw new IndexOutOfBoundsException();
+            }
+
+            Task removedTask = tasks[index];
+
+            for (int i = index; i < taskCount - 1; i++) {
+                tasks[i] = tasks[i + 1];
+            }
+            tasks[taskCount - 1] = null;
+            taskCount--;
+
+            System.out.println("Noted. I've removed this task:");
+            System.out.println("  " + removedTask);
+            System.out.println("Now you have " + taskCount + " tasks in the list.");
+        } catch (NumberFormatException e) {
+            System.out.println("OOPS!!! Please enter a valid task number, e.g. delete 2");
         } catch (IndexOutOfBoundsException e) {
             System.out.println("OOPS!!! That task number doesn't exist. You have " + taskCount + " task(s).");
         }
