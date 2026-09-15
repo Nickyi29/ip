@@ -5,6 +5,10 @@ import nico.tasks.Event;
 import nico.tasks.Task;
 import nico.tasks.Todo;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Nico {
@@ -22,11 +26,13 @@ public class Nico {
     private static final String TODO_COMMAND_PREFIX = "todo ";
     private static final String DEADLINE_COMMAND_PREFIX = "deadline ";
     private static final String EVENT_COMMAND_PREFIX = "event ";
-    private static final String DELETE_COMMAND_PREFIX = "delete ";
 
     private static final String BY_DELIMITER = " /by ";
     private static final String FROM_DELIMITER = " /from ";
     private static final String TO_DELIMITER = " /to ";
+
+    private static final String SAVE_FILE_PATH = "data/nico.txt";
+    private static final String SAVE_FIELD_DELIMITER = " | ";
 
     public static void main(String[] args) {
         String banner = " _   _  ___ ____ ___  \n"
@@ -36,6 +42,7 @@ public class Nico {
                 + "|_| \\_|\\___/_____|___|\n";
 
         printGreeting(banner);
+        loadTasks();
         runCommandLoop();
         printFarewell();
     }
@@ -65,8 +72,6 @@ public class Nico {
             handleDeadline(command);
         } else if (command.startsWith(EVENT_COMMAND_PREFIX)) {
             handleEvent(command);
-        } else if (command.startsWith(DELETE_COMMAND_PREFIX)) {
-            deleteTask(command);
         } else {
             System.out.println("OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
@@ -150,6 +155,7 @@ public class Nico {
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
         System.out.println("Now you have " + taskCount + " tasks in the list.");
+        saveTasks();
     }
 
     private static void printTaskList() {
@@ -165,11 +171,6 @@ public class Nico {
 
         try {
             int index = Integer.parseInt(command.substring(prefixLength).trim()) - 1;
-
-            if (index < 0 || index >= taskCount) {
-                throw new IndexOutOfBoundsException();
-            }
-
             Task task = tasks[index];
 
             if (isDone) {
@@ -180,34 +181,9 @@ public class Nico {
                 System.out.println("OK, I've marked this task as not done yet:");
             }
             System.out.println("  " + task);
+            saveTasks();
         } catch (NumberFormatException e) {
             System.out.println("OOPS!!! Please enter a valid task number, e.g. " + commandName + " 2");
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("OOPS!!! That task number doesn't exist. You have " + taskCount + " task(s).");
-        }
-    }
-
-    private static void deleteTask(String command) {
-        try {
-            int index = Integer.parseInt(command.substring(DELETE_COMMAND_PREFIX.length()).trim()) - 1;
-
-            if (index < 0 || index >= taskCount) {
-                throw new IndexOutOfBoundsException();
-            }
-
-            Task removedTask = tasks[index];
-
-            for (int i = index; i < taskCount - 1; i++) {
-                tasks[i] = tasks[i + 1];
-            }
-            tasks[taskCount - 1] = null;
-            taskCount--;
-
-            System.out.println("Noted. I've removed this task:");
-            System.out.println("  " + removedTask);
-            System.out.println("Now you have " + taskCount + " tasks in the list.");
-        } catch (NumberFormatException e) {
-            System.out.println("OOPS!!! Please enter a valid task number, e.g. delete 2");
         } catch (IndexOutOfBoundsException e) {
             System.out.println("OOPS!!! That task number doesn't exist. You have " + taskCount + " task(s).");
         }
@@ -224,5 +200,89 @@ public class Nico {
     private static void printFarewell() {
         System.out.println("Bye. Hope to see you again soon!");
         System.out.println(DIVIDER);
+    }
+
+    private static void saveTasks() {
+        try {
+            File saveFile = new File(SAVE_FILE_PATH);
+            File parentDir = saveFile.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            FileWriter writer = new FileWriter(saveFile);
+            for (int i = 0; i < taskCount; i++) {
+                writer.write(taskToSaveFormat(tasks[i]) + System.lineSeparator());
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("OOPS!!! I couldn't save your tasks to disk: " + e.getMessage());
+        }
+    }
+
+    private static String taskToSaveFormat(Task task) {
+        String doneFlag = task.isDone() ? "1" : "0";
+
+        if (task instanceof Deadline) {
+            Deadline deadline = (Deadline) task;
+            return "D" + SAVE_FIELD_DELIMITER + doneFlag + SAVE_FIELD_DELIMITER
+                    + deadline.getDescription() + SAVE_FIELD_DELIMITER + deadline.getBy();
+        } else if (task instanceof Event) {
+            Event event = (Event) task;
+            return "E" + SAVE_FIELD_DELIMITER + doneFlag + SAVE_FIELD_DELIMITER
+                    + event.getDescription() + SAVE_FIELD_DELIMITER
+                    + event.getFrom() + SAVE_FIELD_DELIMITER + event.getTo();
+        } else {
+            return "T" + SAVE_FIELD_DELIMITER + doneFlag + SAVE_FIELD_DELIMITER + task.getDescription();
+        }
+    }
+
+    private static void loadTasks() {
+        File saveFile = new File(SAVE_FILE_PATH);
+        if (!saveFile.exists()) {
+            return;
+        }
+
+        try {
+            Scanner fileScanner = new Scanner(saveFile);
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                Task task = parseSaveLine(line);
+                if (task != null && taskCount < MAX_TASKS) {
+                    tasks[taskCount] = task;
+                    taskCount++;
+                }
+            }
+            fileScanner.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("OOPS!!! I couldn't find the save file, starting with an empty list.");
+        }
+    }
+
+    private static Task parseSaveLine(String line) {
+        String[] fields = line.split(java.util.regex.Pattern.quote(SAVE_FIELD_DELIMITER));
+        if (fields.length < 3) {
+            return null;
+        }
+
+        String type = fields[0];
+        boolean isDone = fields[1].equals("1");
+        String description = fields[2];
+
+        Task task;
+        if (type.equals("D") && fields.length >= 4) {
+            task = new Deadline(description, fields[3]);
+        } else if (type.equals("E") && fields.length >= 5) {
+            task = new Event(description, fields[3], fields[4]);
+        } else if (type.equals("T")) {
+            task = new Todo(description);
+        } else {
+            return null;
+        }
+
+        if (isDone) {
+            task.markAsDone();
+        }
+        return task;
     }
 }
