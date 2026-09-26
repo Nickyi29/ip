@@ -1,30 +1,24 @@
 package nico.tasks;
 
-public class Event extends Task {
-    protected String from;
-    protected String to;
+public class Deadline extends Task {
+    protected String by;
 
-    public Event(String description, String from, String to) {
+    public Deadline(String description, String by) {
         super(description);
-        this.from = from;
-        this.to = to;
+        this.by = by;
     }
 
     @Override
     public String getTypeIcon() {
-        return "E";
+        return "D";
     }
 
-    public String getFrom() {
-        return from;
-    }
-
-    public String getTo() {
-        return to;
+    public String getBy() {
+        return by;
     }
 
     @Override
     public String toString() {
-        return super.toString() + " (from: " + from + " to: " + to + ")";
+        return super.toString() + " (by: " + by + ")";
     }
 }

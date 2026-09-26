@@ -1,30 +1,35 @@
 package nico.tasks;
 
-public class Event extends Task {
-    protected String from;
-    protected String to;
+public abstract class Task {
+    protected String description;
+    protected boolean isDone;
 
-    public Event(String description, String from, String to) {
-        super(description);
-        this.from = from;
-        this.to = to;
+    public Task(String description) {
+        this.description = description;
+        this.isDone = false;
     }
 
-    @Override
-    public String getTypeIcon() {
-        return "E";
+    public void markAsDone() {
+        isDone = true;
     }
 
-    public String getFrom() {
-        return from;
+    public void markAsNotDone() {
+        isDone = false;
     }
 
-    public String getTo() {
-        return to;
+    public String getDescription() {
+        return description;
     }
+
+    public boolean isDone() {
+        return isDone;
+    }
+
+    public abstract String getTypeIcon();
 
     @Override
     public String toString() {
-        return super.toString() + " (from: " + from + " to: " + to + ")";
+        String statusIcon = isDone ? "X" : " ";
+        return "[" + getTypeIcon() + "][" + statusIcon + "] " + description;
     }
 }
