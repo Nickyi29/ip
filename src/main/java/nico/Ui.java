@@ -135,7 +135,11 @@ public class Ui {
         System.out.println("Here are your deadlines and events on " + dateText + ":");
         printNumbered(tasksOnDate);
     }
-
+    /**
+     * Prints the given tasks one per line, numbered from 1.
+     *
+     * @param tasks The tasks to print.
+     */
     private void printNumbered(List<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println((i + 1) + "." + tasks.get(i));

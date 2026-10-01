@@ -86,7 +86,9 @@ public class Storage {
 
     /**
      * Converts one line of the save file back into a Task.
-     * Returns null if the line is not in a recognised format, or holds an invalid date.
+     *
+     * @param line One line of the save file, e.g. <code>D | 0 | return book | 2026-10-15</code>.
+     * @return The task, or null if the line is not in a recognised format or holds an invalid date.
      */
     private Task extractTask(String line) {
         // Pattern.quote is needed because "|" is a special character in regex.

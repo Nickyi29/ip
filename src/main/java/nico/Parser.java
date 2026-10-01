@@ -78,6 +78,11 @@ public class Parser {
 
     /**
      * Converts the task number typed by the user (1-based) into a 0-based index.
+     *
+     * @param arguments The text after the command, e.g. <code>2</code>.
+     * @param commandWord The command being parsed, used in the error message.
+     * @return The 0-based index.
+     * @throws NicoException If the text is not a whole number.
      */
     private static int parseTaskIndex(String arguments, String commandWord) throws NicoException {
         try {
@@ -86,14 +91,26 @@ public class Parser {
             throw new NicoException("Please enter a valid task number, e.g. " + commandWord + " 2");
         }
     }
-
+    /**
+     * Returns the search keyword, rejecting an empty one.
+     *
+     * @param arguments The text after the find command.
+     * @return The keyword to search for.
+     * @throws NicoException If no keyword was given.
+     */
     private static String parseKeyword(String arguments) throws NicoException {
         if (arguments.isEmpty()) {
             throw new NicoException("Please tell me what to search for, e.g. find book");
         }
         return arguments;
     }
-
+    /**
+     * Converts text in yyyy-mm-dd format into a date.
+     *
+     * @param arguments The text after the on command.
+     * @return The date entered.
+     * @throws NicoException If the text is not a valid yyyy-mm-dd date.
+     */
     private static LocalDate parseDate(String arguments) throws NicoException {
         try {
             return LocalDate.parse(arguments);
@@ -101,7 +118,13 @@ public class Parser {
             throw new NicoException("Please give a date as yyyy-mm-dd, e.g. on 2026-10-15");
         }
     }
-
+    /**
+     * Creates a Todo from the text after the todo command.
+     *
+     * @param arguments The todo description.
+     * @return The new Todo.
+     * @throws NicoException If the description is empty.
+     */
     private static Todo parseTodo(String arguments) throws NicoException {
         if (arguments.isEmpty()) {
             throw new NicoException("The description of a todo cannot be empty.");
@@ -109,6 +132,13 @@ public class Parser {
         return new Todo(arguments);
     }
 
+    /**
+     * Creates a Deadline from text such as <code>return book /by 2026-10-15</code>.
+     *
+     * @param arguments The text after the deadline command.
+     * @return The new Deadline.
+     * @throws NicoException If /by is missing, a part is empty, or the date is invalid.
+     */
     private static Deadline parseDeadline(String arguments) throws NicoException {
         int byIndex = arguments.indexOf(BY_KEYWORD);
         if (byIndex == -1) {
@@ -125,7 +155,14 @@ public class Parser {
         }
         return new Deadline(description, TaskDateTime.parse(by));
     }
-
+    /**
+     * Creates an Event from text such as <code>meeting /from 2026-10-15 1400 /to 2026-10-15 1600</code>.
+     *
+     * @param arguments The text after the event command.
+     * @return The new Event.
+     * @throws NicoException If /from or /to is missing, a part is empty, a date is invalid,
+     *     or the event ends before it starts.
+     */
     private static Event parseEvent(String arguments) throws NicoException {
         int fromIndex = arguments.indexOf(FROM_KEYWORD);
         int toIndex = arguments.indexOf(TO_KEYWORD);
