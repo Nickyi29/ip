@@ -134,7 +134,12 @@ public class TaskList {
                 .filter(task -> task.occursOn(date))
                 .toList();
     }
-
+    /**
+     * Checks that a 0-based index refers to an existing task.
+     *
+     * @param index The index to check.
+     * @throws NicoException If the index is outside the list.
+     */
     private void checkIndex(int index) throws NicoException {
         if (index < 0 || index >= tasks.size()) {
             throw new NicoException("That task number doesn't exist. You have "

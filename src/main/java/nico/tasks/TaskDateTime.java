@@ -34,6 +34,14 @@ public class TaskDateTime {
     private final LocalDateTime dateTime;
     private final boolean hasTime;
 
+    /**
+     * Creates a TaskDateTime. Use {@link #parse(String)} instead of calling this directly.
+     *
+     * @param rawText The text as typed by the user.
+     * @param dateTime The parsed date and time, or null for free text.
+     * @param hasTime Whether a time of day was given.
+     */
+
     private TaskDateTime(String rawText, LocalDateTime dateTime, boolean hasTime) {
         this.rawText = rawText;
         this.dateTime = dateTime;
